@@ -42,6 +42,7 @@ const Transactions: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError('');
         const [transactionsRes, categoriesRes] = await Promise.all([
           axios.get('http://localhost:3000/transactions'),
           axios.get('http://localhost:3000/categories'),
@@ -49,9 +50,9 @@ const Transactions: React.FC = () => {
         
         setTransactions(transactionsRes.data);
         setCategories(categoriesRes.data);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching data:', err);
-        setError('Failed to load data');
+        setError(err.response?.data?.message || 'Failed to load data');
       } finally {
         setLoading(false);
       }
@@ -74,13 +75,24 @@ const Transactions: React.FC = () => {
     e.preventDefault();
     
     try {
+      setError('');
       const response = await axios.post('http://localhost:3000/transactions', {
         ...formData,
         amount: parseFloat(formData.amount),
         category_id: parseInt(formData.category_id),
       });
+
+      const category = categories.find(c => c.id === parseInt(formData.category_id));
+      if (!category) {
+        throw new Error('Category not found');
+      }
+
+      const newTransaction: Transaction = {
+        ...response.data,
+        category: category
+      };
       
-      setTransactions([response.data, ...transactions]);
+      setTransactions([newTransaction, ...transactions]);
       setShowForm(false);
       setFormData({
         category_id: '',
@@ -88,9 +100,10 @@ const Transactions: React.FC = () => {
         date: format(new Date(), 'yyyy-MM-dd'),
         comment: '',
       });
-    } catch (err) {
+
+    } catch (err: any) {
       console.error('Error creating transaction:', err);
-      setError('Failed to create transaction');
+      setError(err.response?.data?.message || 'Failed to create transaction');
     }
   };
 
