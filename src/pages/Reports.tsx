@@ -30,6 +30,23 @@ interface Report {
   created_at: string;
 }
 
+interface StatisticalMetrics {
+  income: {
+    mean: number;
+    median: number;
+    mode: number;
+    variance: number;
+    standardDeviation: number;
+  };
+  expense: {
+    mean: number;
+    median: number;
+    mode: number;
+    variance: number;
+    standardDeviation: number;
+  };
+}
+
 interface ReportData {
   period: {
     from: string;
@@ -40,6 +57,7 @@ interface ReportData {
     totalExpense: number;
     balance: number;
   };
+  statistics: StatisticalMetrics;
   categories: {
     name: string;
     type: string;
@@ -79,13 +97,82 @@ const Reports: React.FC = () => {
     setDateRange({ ...dateRange, [name]: value });
   };
 
+  const calculateStatistics = (transactions: Transaction[]): StatisticalMetrics => {
+    const incomeAmounts = transactions
+      .filter(t => t.category.type === 'income')
+      .map(t => Number(t.amount));
+    
+    const expenseAmounts = transactions
+      .filter(t => t.category.type === 'expense')
+      .map(t => Number(t.amount));
+
+    const calculateMetrics = (amounts: number[]) => {
+      if (amounts.length === 0) {
+        return {
+          mean: 0,
+          median: 0,
+          mode: 0,
+          variance: 0,
+          standardDeviation: 0
+        };
+      }
+
+      // Среднее значение
+      const mean = amounts.reduce((sum, val) => sum + val, 0) / amounts.length;
+
+      // Медиана
+      const sorted = [...amounts].sort((a, b) => a - b);
+      const median = amounts.length % 2 === 0
+        ? (sorted[amounts.length / 2 - 1] + sorted[amounts.length / 2]) / 2
+        : sorted[Math.floor(amounts.length / 2)];
+
+      // Мода
+      const frequency: { [key: number]: number } = {};
+      let maxFreq = 0;
+      let mode = amounts[0];
+      
+      amounts.forEach(val => {
+        frequency[val] = (frequency[val] || 0) + 1;
+        if (frequency[val] > maxFreq) {
+          maxFreq = frequency[val];
+          mode = val;
+        }
+      });
+
+      // Дисперсия
+      const variance = amounts.length > 1
+        ? amounts.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (amounts.length - 1)
+        : 0;
+
+      // Среднеквадратичное отклонение
+      const standardDeviation = Math.sqrt(variance);
+
+      return {
+        mean,
+        median,
+        mode,
+        variance,
+        standardDeviation
+      };
+    };
+
+    return {
+      income: calculateMetrics(incomeAmounts),
+      expense: calculateMetrics(expenseAmounts)
+    };
+  };
+
   const generateReport = async () => {
     try {
       setLoading(true);
       setError('');
       
       const response = await axios.post('http://localhost:3000/reports/generate/monthly', dateRange);
-      setReportData(response.data);
+      const statistics = calculateStatistics(response.data.transactions);
+      setReportData({
+        ...response.data,
+        statistics
+      });
     } catch (err) {
       console.error('Error generating report:', err);
       setError('Не удалось сгенерировать отчет');
@@ -122,7 +209,11 @@ const Reports: React.FC = () => {
         to: response.data.period_to,
       });
       
-      setReportData(reportResponse.data);
+      const statistics = calculateStatistics(reportResponse.data.transactions);
+      setReportData({
+        ...reportResponse.data,
+        statistics
+      });
       setDateRange({
         from: response.data.period_from,
         to: response.data.period_to,
@@ -192,6 +283,14 @@ const Reports: React.FC = () => {
   };
 
   const { doughnutData, barData } = reportData ? prepareChartData() : { doughnutData: null, barData: null };
+
+  // Добавим функцию форматирования чисел
+  const formatNumber = (value: number | null | undefined): string => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return '0.00';
+    }
+    return Number(value).toFixed(2);
+  };
 
   return (
     <div>
@@ -352,6 +451,66 @@ const Reports: React.FC = () => {
               }`}>
                 ${reportData.summary.balance.toFixed(2)}
               </p>
+            </div>
+          </div>
+          
+          {/* Statistical Metrics */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h3 className="text-lg font-semibold mb-4">Статистические показатели</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Income Statistics */}
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="text-green-700 font-semibold mb-3">Статистика доходов</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Среднее значение:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.income?.mean)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Медиана:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.income?.median)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Мода:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.income?.mode)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Дисперсия:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.income?.variance)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Среднеквадратичное отклонение:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.income?.standardDeviation)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Expense Statistics */}
+              <div className="bg-red-50 p-4 rounded-lg">
+                <h4 className="text-red-700 font-semibold mb-3">Статистика расходов</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Среднее значение:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.expense?.mean)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Медиана:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.expense?.median)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Мода:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.expense?.mode)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Дисперсия:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.expense?.variance)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Среднеквадратичное отклонение:</span>
+                    <span className="font-medium">${formatNumber(reportData.statistics?.expense?.standardDeviation)}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           
