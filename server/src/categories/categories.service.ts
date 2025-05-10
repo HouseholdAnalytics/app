@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category, CategoryType } from './category.entity';
@@ -28,5 +28,22 @@ export class CategoriesService {
     return this.categoriesRepository.find({
       where: { type: type as CategoryType },
     });
+  }
+
+  async remove(id: number): Promise<void> {
+    const category = await this.categoriesRepository.findOne({
+      where: { id },
+      relations: ['transactions'],
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    if (category.transactions && category.transactions.length > 0) {
+      throw new BadRequestException('Cannot delete category that is in use by transactions');
+    }
+
+    await this.categoriesRepository.remove(category);
   }
 }

@@ -82,17 +82,10 @@ const Transactions: React.FC = () => {
         category_id: parseInt(formData.category_id),
       });
 
-      const category = categories.find(c => c.id === parseInt(formData.category_id));
-      if (!category) {
-        throw new Error('Category not found');
-      }
-
-      const newTransaction: Transaction = {
-        ...response.data,
-        category: category
-      };
+      // Fetch the complete transaction data with category
+      const transactionResponse = await axios.get(`http://localhost:3000/transactions/${response.data.id}`);
       
-      setTransactions([newTransaction, ...transactions]);
+      setTransactions([transactionResponse.data, ...transactions]);
       setShowForm(false);
       setFormData({
         category_id: '',
