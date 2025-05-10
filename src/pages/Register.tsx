@@ -17,11 +17,11 @@ const Register: React.FC = () => {
     setError('');
     
     if (password !== confirmPassword) {
-      return setError('Passwords do not match');
+      return setError('Пароли не совпадают');
     }
     
     if (password.length < 6) {
-      return setError('Password must be at least 6 characters');
+      return setError('Пароль должен содержать не менее 6 символов');
     }
     
     setLoading(true);
@@ -30,7 +30,7 @@ const Register: React.FC = () => {
       await register(username, email, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to create an account');
+      setError(err.response?.data?.message || 'Не удалось создать аккаунт');
       console.error('Registration error:', err);
     } finally {
       setLoading(false);
@@ -40,7 +40,7 @@ const Register: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Create an Account</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Создание аккаунта</h1>
         
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -51,7 +51,7 @@ const Register: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-gray-700 font-medium mb-2">
-              Username
+              Имя пользователя
             </label>
             <input
               type="text"
@@ -65,7 +65,7 @@ const Register: React.FC = () => {
           
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-              Email
+              Электронная почта
             </label>
             <input
               type="email"
@@ -79,7 +79,7 @@ const Register: React.FC = () => {
           
           <div className="mb-4">
             <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-              Password
+              Пароль
             </label>
             <input
               type="password"
@@ -93,7 +93,7 @@ const Register: React.FC = () => {
           
           <div className="mb-6">
             <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-2">
-              Confirm Password
+              Подтверждение пароля
             </label>
             <input
               type="password"
@@ -110,14 +110,14 @@ const Register: React.FC = () => {
             disabled={loading}
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Creating Account...' : 'Register'}
+            {loading ? 'Создание аккаунта...' : 'Зарегистрироваться'}
           </button>
         </form>
         
         <p className="mt-4 text-center text-gray-600">
-          Already have an account?{' '}
+          Уже есть аккаунт?{' '}
           <Link to="/login" className="text-blue-500 hover:underline">
-            Login
+            Войти
           </Link>
         </p>
       </div>

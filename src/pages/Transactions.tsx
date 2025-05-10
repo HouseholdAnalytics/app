@@ -52,7 +52,7 @@ const Transactions: React.FC = () => {
         setCategories(categoriesRes.data);
       } catch (err: any) {
         console.error('Error fetching data:', err);
-        setError(err.response?.data?.message || 'Failed to load data');
+        setError(err.response?.data?.message || 'Не удалось загрузить данные');
       } finally {
         setLoading(false);
       }
@@ -96,12 +96,12 @@ const Transactions: React.FC = () => {
 
     } catch (err: any) {
       console.error('Error creating transaction:', err);
-      setError(err.response?.data?.message || 'Failed to create transaction');
+      setError(err.response?.data?.message || 'Не удалось создать транзакцию');
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this transaction?')) {
+    if (!window.confirm('Вы уверены, что хотите удалить эту транзакцию?')) {
       return;
     }
     
@@ -110,7 +110,7 @@ const Transactions: React.FC = () => {
       setTransactions(transactions.filter(t => t.id !== id));
     } catch (err) {
       console.error('Error deleting transaction:', err);
-      setError('Failed to delete transaction');
+      setError('Не удалось удалить транзакцию');
     }
   };
 
@@ -139,19 +139,19 @@ const Transactions: React.FC = () => {
   });
 
   if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return <div className="text-center py-10">Загрузка...</div>;
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Transactions</h1>
+        <h1 className="text-2xl font-bold">Транзакции</h1>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-blue-600 transition-colors"
         >
           <Plus size={18} />
-          <span>Add Transaction</span>
+          <span>Добавить транзакцию</span>
         </button>
       </div>
       
@@ -164,12 +164,12 @@ const Transactions: React.FC = () => {
       {/* Add Transaction Form */}
       {showForm && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-lg font-semibold mb-4">Add New Transaction</h2>
+          <h2 className="text-lg font-semibold mb-4">Добавить новую транзакцию</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
+                  Категория
                 </label>
                 <select
                   id="category_id"
@@ -179,8 +179,8 @@ const Transactions: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">Select a category</option>
-                  <optgroup label="Income">
+                  <option value="">Выберите категорию</option>
+                  <optgroup label="Доходы">
                     {categories
                       .filter(c => c.type === 'income')
                       .map(category => (
@@ -189,7 +189,7 @@ const Transactions: React.FC = () => {
                         </option>
                       ))}
                   </optgroup>
-                  <optgroup label="Expense">
+                  <optgroup label="Расходы">
                     {categories
                       .filter(c => c.type === 'expense')
                       .map(category => (
@@ -203,7 +203,7 @@ const Transactions: React.FC = () => {
               
               <div>
                 <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-                  Amount
+                  Сумма
                 </label>
                 <input
                   type="number"
@@ -220,7 +220,7 @@ const Transactions: React.FC = () => {
               
               <div>
                 <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-                  Date
+                  Дата
                 </label>
                 <input
                   type="date"
@@ -235,7 +235,7 @@ const Transactions: React.FC = () => {
               
               <div>
                 <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">
-                  Comment (Optional)
+                  Комментарий (необязательно)
                 </label>
                 <input
                   type="text"
@@ -254,13 +254,13 @@ const Transactions: React.FC = () => {
                 onClick={() => setShowForm(false)}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                Отмена
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
               >
-                Save Transaction
+                Сохранить транзакцию
               </button>
             </div>
           </form>
@@ -271,13 +271,13 @@ const Transactions: React.FC = () => {
       <div className="bg-white p-4 rounded-lg shadow-md mb-6">
         <div className="flex items-center space-x-2 mb-4">
           <Filter size={18} className="text-gray-500" />
-          <h2 className="text-lg font-semibold">Filters</h2>
+          <h2 className="text-lg font-semibold">Фильтры</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-              Type
+              Тип
             </label>
             <select
               id="type"
@@ -286,15 +286,15 @@ const Transactions: React.FC = () => {
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Types</option>
-              <option value="income">Income</option>
-              <option value="expense">Expense</option>
+              <option value="all">Все типы</option>
+              <option value="income">Доходы</option>
+              <option value="expense">Расходы</option>
             </select>
           </div>
           
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-              Category
+              Категория
             </label>
             <select
               id="category"
@@ -303,7 +303,7 @@ const Transactions: React.FC = () => {
               onChange={handleFilterChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Categories</option>
+              <option value="all">Все категории</option>
               {categories.map(category => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -314,7 +314,7 @@ const Transactions: React.FC = () => {
           
           <div>
             <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 mb-1">
-              From Date
+              Дата с
             </label>
             <input
               type="date"
@@ -328,7 +328,7 @@ const Transactions: React.FC = () => {
           
           <div>
             <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 mb-1">
-              To Date
+              Дата по
             </label>
             <input
               type="date"
@@ -349,18 +349,18 @@ const Transactions: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredTransactions.map((transaction) => (
                   <tr key={transaction.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {format(new Date(transaction.date), 'MMM dd, yyyy')}
+                      {format(new Date(transaction.date), 'dd MMM yyyy')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -391,7 +391,7 @@ const Transactions: React.FC = () => {
             </table>
           </div>
         ) : (
-          <p className="text-center text-gray-500 py-8">No transactions found</p>
+          <p className="text-center text-gray-500 py-8">Транзакции не найдены</p>
         )}
       </div>
     </div>

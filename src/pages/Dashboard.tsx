@@ -52,7 +52,7 @@ const Dashboard: React.FC = () => {
         });
       } catch (err) {
         console.error('Error fetching transactions:', err);
-        setError('Failed to load transactions');
+        setError('Не удалось загрузить транзакции');
       } finally {
         setLoading(false);
       }
@@ -111,12 +111,12 @@ const Dashboard: React.FC = () => {
       labels: Object.keys(monthlyData),
       datasets: [
         {
-          label: 'Income',
+          label: 'Доход',
           data: Object.values(monthlyData).map((data) => data.income),
           backgroundColor: 'rgba(34, 197, 94, 0.7)',
         },
         {
-          label: 'Expense',
+          label: 'Расход',
           data: Object.values(monthlyData).map((data) => data.expense),
           backgroundColor: 'rgba(239, 68, 68, 0.7)',
         },
@@ -129,7 +129,7 @@ const Dashboard: React.FC = () => {
   const { doughnutData, barData } = transactions.length ? prepareChartData() : { doughnutData: null, barData: null };
 
   if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return <div className="text-center py-10">Загрузка...</div>;
   }
 
   if (error) {
@@ -138,7 +138,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6">Панель управления</h1>
       
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -148,7 +148,7 @@ const Dashboard: React.FC = () => {
               <Wallet className="text-blue-500" size={24} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Balance</p>
+              <p className="text-sm text-gray-500">Баланс</p>
               <p className="text-xl font-bold">${summary.balance.toFixed(2)}</p>
             </div>
           </div>
@@ -160,7 +160,7 @@ const Dashboard: React.FC = () => {
               <TrendingUp className="text-green-500" size={24} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Income</p>
+              <p className="text-sm text-gray-500">Доходы</p>
               <p className="text-xl font-bold">${summary.totalIncome.toFixed(2)}</p>
             </div>
           </div>
@@ -172,7 +172,7 @@ const Dashboard: React.FC = () => {
               <TrendingDown className="text-red-500" size={24} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Expenses</p>
+              <p className="text-sm text-gray-500">Расходы</p>
               <p className="text-xl font-bold">${summary.totalExpense.toFixed(2)}</p>
             </div>
           </div>
@@ -184,7 +184,7 @@ const Dashboard: React.FC = () => {
               <DollarSign className="text-purple-500" size={24} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Transactions</p>
+              <p className="text-sm text-gray-500">Транзакции</p>
               <p className="text-xl font-bold">{transactions.length}</p>
             </div>
           </div>
@@ -194,18 +194,18 @@ const Dashboard: React.FC = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Spending by Category</h2>
+          <h2 className="text-lg font-semibold mb-4">Расходы по категориям</h2>
           {doughnutData && transactions.length > 0 ? (
             <div className="h-64">
               <Doughnut data={doughnutData} options={{ maintainAspectRatio: false }} />
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-10">No data to display</p>
+            <p className="text-center text-gray-500 py-10">Нет данных для отображения</p>
           )}
         </div>
         
         <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-semibold mb-4">Monthly Overview</h2>
+          <h2 className="text-lg font-semibold mb-4">Ежемесячный обзор</h2>
           {barData && transactions.length > 0 ? (
             <div className="h-64">
               <Bar 
@@ -221,23 +221,23 @@ const Dashboard: React.FC = () => {
               />
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-10">No data to display</p>
+            <p className="text-center text-gray-500 py-10">Нет данных для отображения</p>
           )}
         </div>
       </div>
       
       {/* Recent Transactions */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
+        <h2 className="text-lg font-semibold mb-4">Последние транзакции</h2>
         {transactions.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">

@@ -28,7 +28,7 @@ const Categories: React.FC = () => {
         setCategories(response.data);
       } catch (err) {
         console.error('Error fetching categories:', err);
-        setError('Failed to load categories');
+        setError('Не удалось загрузить категории');
       } finally {
         setLoading(false);
       }
@@ -55,12 +55,12 @@ const Categories: React.FC = () => {
       });
     } catch (err) {
       console.error('Error creating category:', err);
-      setError('Failed to create category');
+      setError('Не удалось создать категорию');
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this category? This will affect all transactions using this category.')) {
+    if (!window.confirm('Вы уверены, что хотите удалить эту категорию? Это повлияет на все транзакции, использующие эту категорию.')) {
       return;
     }
     
@@ -69,26 +69,26 @@ const Categories: React.FC = () => {
       setCategories(categories.filter(c => c.id !== id));
     } catch (err) {
       console.error('Error deleting category:', err);
-      setError('Failed to delete category. It may be in use by transactions.');
+      setError('Не удалось удалить категорию. Возможно, она используется в транзакциях.');
     }
   };
 
   const filteredCategories = categories.filter(category => category.type === activeTab);
 
   if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return <div className="text-center py-10">Загрузка...</div>;
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Categories</h1>
+        <h1 className="text-2xl font-bold">Категории</h1>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-blue-600 transition-colors"
         >
           <Plus size={18} />
-          <span>Add Category</span>
+          <span>Добавить категорию</span>
         </button>
       </div>
       
@@ -101,12 +101,12 @@ const Categories: React.FC = () => {
       {/* Add Category Form */}
       {showForm && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-lg font-semibold mb-4">Add New Category</h2>
+          <h2 className="text-lg font-semibold mb-4">Добавить новую категорию</h2>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Category Name
+                  Название категории
                 </label>
                 <input
                   type="text"
@@ -121,7 +121,7 @@ const Categories: React.FC = () => {
               
               <div>
                 <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-                  Type
+                  Тип
                 </label>
                 <select
                   id="type"
@@ -131,8 +131,8 @@ const Categories: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="income">Income</option>
-                  <option value="expense">Expense</option>
+                  <option value="income">Доход</option>
+                  <option value="expense">Расход</option>
                 </select>
               </div>
             </div>
@@ -143,13 +143,13 @@ const Categories: React.FC = () => {
                 onClick={() => setShowForm(false)}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                Отмена
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
               >
-                Save Category
+                Сохранить категорию
               </button>
             </div>
           </form>
@@ -168,7 +168,7 @@ const Categories: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Income Categories
+              Категории доходов
             </button>
             <button
               onClick={() => setActiveTab('expense')}
@@ -178,7 +178,7 @@ const Categories: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Expense Categories
+              Категории расходов
             </button>
           </nav>
         </div>
@@ -191,9 +191,9 @@ const Categories: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Название</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -206,7 +206,7 @@ const Categories: React.FC = () => {
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         category.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {category.type}
+                        {category.type === 'income' ? 'Доход' : 'Расход'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -223,7 +223,9 @@ const Categories: React.FC = () => {
             </table>
           </div>
         ) : (
-          <p className="text-center text-gray-500 py-8">No {activeTab} categories found</p>
+          <p className="text-center text-gray-500 py-8">
+            {activeTab === 'income' ? 'Категории доходов не найдены' : 'Категории расходов не найдены'}
+          </p>
         )}
       </div>
     </div>

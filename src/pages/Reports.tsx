@@ -67,7 +67,7 @@ const Reports: React.FC = () => {
         setSavedReports(response.data);
       } catch (err) {
         console.error('Error fetching saved reports:', err);
-        setError('Failed to load saved reports');
+        setError('Не удалось загрузить сохраненные отчеты');
       }
     };
 
@@ -88,7 +88,7 @@ const Reports: React.FC = () => {
       setReportData(response.data);
     } catch (err) {
       console.error('Error generating report:', err);
-      setError('Failed to generate report');
+      setError('Не удалось сгенерировать отчет');
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ const Reports: React.FC = () => {
       setSavedReports([response.data, ...savedReports]);
     } catch (err) {
       console.error('Error saving report:', err);
-      setError('Failed to save report');
+      setError('Не удалось сохранить отчет');
     }
   };
 
@@ -129,7 +129,7 @@ const Reports: React.FC = () => {
       });
     } catch (err) {
       console.error('Error loading report:', err);
-      setError('Failed to load report');
+      setError('Не удалось загрузить отчет');
     } finally {
       setLoading(false);
     }
@@ -176,12 +176,12 @@ const Reports: React.FC = () => {
       labels: Object.keys(dailyData),
       datasets: [
         {
-          label: 'Income',
+          label: 'Доходы',
           data: Object.values(dailyData).map(data => data.income),
           backgroundColor: 'rgba(34, 197, 94, 0.7)',
         },
         {
-          label: 'Expense',
+          label: 'Расходы',
           data: Object.values(dailyData).map(data => data.expense),
           backgroundColor: 'rgba(239, 68, 68, 0.7)',
         },
@@ -195,7 +195,7 @@ const Reports: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Reports</h1>
+      <h1 className="text-2xl font-bold mb-6">Отчеты</h1>
       
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -207,13 +207,13 @@ const Reports: React.FC = () => {
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <div className="flex items-center space-x-2 mb-4">
           <Calendar size={20} className="text-gray-500" />
-          <h2 className="text-lg font-semibold">Generate Report</h2>
+          <h2 className="text-lg font-semibold">Создать отчет</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <label htmlFor="from" className="block text-sm font-medium text-gray-700 mb-1">
-              From Date
+              Дата начала
             </label>
             <input
               type="date"
@@ -227,7 +227,7 @@ const Reports: React.FC = () => {
           
           <div>
             <label htmlFor="to" className="block text-sm font-medium text-gray-700 mb-1">
-              To Date
+              Дата окончания
             </label>
             <input
               type="date"
@@ -245,7 +245,7 @@ const Reports: React.FC = () => {
               disabled={loading}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Generating...' : 'Generate Report'}
+              {loading ? 'Создание...' : 'Создать отчет'}
             </button>
           </div>
         </div>
@@ -255,7 +255,7 @@ const Reports: React.FC = () => {
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <div className="flex items-center space-x-2 mb-4">
           <FileText size={20} className="text-gray-500" />
-          <h2 className="text-lg font-semibold">Saved Reports</h2>
+          <h2 className="text-lg font-semibold">Сохраненные отчеты</h2>
         </div>
         
         {savedReports.length > 0 ? (
@@ -263,30 +263,30 @@ const Reports: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип отчета</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Период</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата создания</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {savedReports.map((report) => (
                   <tr key={report.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {report.report_type}
+                      {report.report_type === 'monthly' ? 'Ежемесячный' : report.report_type}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {format(new Date(report.period_from), 'MMM dd, yyyy')} - {format(new Date(report.period_to), 'MMM dd, yyyy')}
+                      {format(new Date(report.period_from), 'dd MMM yyyy')} - {format(new Date(report.period_to), 'dd MMM yyyy')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {format(new Date(report.created_at), 'MMM dd, yyyy HH:mm')}
+                      {format(new Date(report.created_at), 'dd MMM yyyy HH:mm')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => loadReport(report.id)}
                         className="text-blue-600 hover:text-blue-900"
                       >
-                        Load
+                        Загрузить
                       </button>
                     </td>
                   </tr>
@@ -295,7 +295,7 @@ const Reports: React.FC = () => {
             </table>
           </div>
         ) : (
-          <p className="text-center text-gray-500 py-4">No saved reports</p>
+          <p className="text-center text-gray-500 py-4">Сохраненных отчетов нет</p>
         )}
       </div>
       
@@ -304,7 +304,7 @@ const Reports: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">
-              Report: {format(new Date(reportData.period.from), 'MMM dd, yyyy')} - {format(new Date(reportData.period.to), 'MMM dd, yyyy')}
+              Отчет: {format(new Date(reportData.period.from), 'dd MMM yyyy')} - {format(new Date(reportData.period.to), 'dd MMM yyyy')}
             </h2>
             <div className="flex space-x-3">
               <button
@@ -312,17 +312,17 @@ const Reports: React.FC = () => {
                 className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center space-x-2"
               >
                 <FileText size={18} />
-                <span>Save Report</span>
+                <span>Сохранить отчет</span>
               </button>
               <button
                 onClick={() => {
                   // In a real app, this would generate a PDF or CSV
-                  alert('Download functionality would be implemented here');
+                  alert('Функция экспорта будет реализована позже');
                 }}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
               >
                 <Download size={18} />
-                <span>Export</span>
+                <span>Экспорт</span>
               </button>
             </div>
           </div>
@@ -330,12 +330,12 @@ const Reports: React.FC = () => {
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-blue-500 font-medium">Total Income</p>
+              <p className="text-sm text-blue-500 font-medium">Общий доход</p>
               <p className="text-2xl font-bold text-blue-700">${reportData.summary.totalIncome.toFixed(2)}</p>
             </div>
             
             <div className="bg-red-50 p-4 rounded-lg">
-              <p className="text-sm text-red-500 font-medium">Total Expenses</p>
+              <p className="text-sm text-red-500 font-medium">Общий расход</p>
               <p className="text-2xl font-bold text-red-700">${reportData.summary.totalExpense.toFixed(2)}</p>
             </div>
             
@@ -345,7 +345,7 @@ const Reports: React.FC = () => {
               <p className={`text-sm font-medium ${
                 reportData.summary.balance >= 0 ? 'text-green-500' : 'text-red-500'
               }`}>
-                Balance
+                Баланс
               </p>
               <p className={`text-2xl font-bold ${
                 reportData.summary.balance >= 0 ? 'text-green-700' : 'text-red-700'
@@ -358,7 +358,7 @@ const Reports: React.FC = () => {
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-white p-4 rounded-lg border">
-              <h3 className="text-lg font-semibold mb-4">Spending by Category</h3>
+              <h3 className="text-lg font-semibold mb-4">Расходы по категориям</h3>
               {doughnutData && (
                 <div className="h-64">
                   <Doughnut data={doughnutData} options={{ maintainAspectRatio: false }} />
@@ -367,7 +367,7 @@ const Reports: React.FC = () => {
             </div>
             
             <div className="bg-white p-4 rounded-lg border">
-              <h3 className="text-lg font-semibold mb-4">Daily Overview</h3>
+              <h3 className="text-lg font-semibold mb-4">Ежедневный обзор</h3>
               {barData && (
                 <div className="h-64">
                   <Bar 
@@ -388,15 +388,15 @@ const Reports: React.FC = () => {
           
           {/* Category Breakdown */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-4">Category Breakdown</h3>
+            <h3 className="text-lg font-semibold mb-4">Разбивка по категориям</h3>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% of Total</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">% от общего</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -414,7 +414,7 @@ const Reports: React.FC = () => {
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             category.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
-                            {category.type}
+                            {category.type === 'income' ? 'Доход' : 'Расход'}
                           </span>
                         </td>
                         <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${
@@ -435,22 +435,22 @@ const Reports: React.FC = () => {
           
           {/* Transactions List */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Transactions</h3>
+            <h3 className="text-lg font-semibold mb-4">Транзакции</h3>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Описание</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {reportData.transactions.map((transaction) => (
                     <tr key={transaction.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {format(new Date(transaction.date), 'MMM dd, yyyy')}
+                        {format(new Date(transaction.date), 'dd MMM yyyy')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

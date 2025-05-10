@@ -19,7 +19,7 @@ const Login: React.FC = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError('Failed to log in. Please check your credentials.');
+      setError('Не удалось войти. Пожалуйста, проверьте ваши учетные данные.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -29,7 +29,7 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Login to Finance Tracker</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">Вход в Финансовый Трекер</h1>
         
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -40,7 +40,7 @@ const Login: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-              Email
+              Электронная почта
             </label>
             <input
               type="email"
@@ -54,7 +54,7 @@ const Login: React.FC = () => {
           
           <div className="mb-6">
             <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-              Password
+              Пароль
             </label>
             <input
               type="password"
@@ -71,14 +71,14 @@ const Login: React.FC = () => {
             disabled={loading}
             className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Выполняется вход...' : 'Войти'}
           </button>
         </form>
         
         <p className="mt-4 text-center text-gray-600">
-          Don't have an account?{' '}
+          Нет аккаунта?{' '}
           <Link to="/register" className="text-blue-500 hover:underline">
-            Register
+            Зарегистрироваться
           </Link>
         </p>
       </div>

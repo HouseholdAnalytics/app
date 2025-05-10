@@ -14,10 +14,10 @@ const Layout: React.FC = () => {
   };
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { path: '/transactions', label: 'Transactions', icon: <DollarSign size={20} /> },
-    { path: '/categories', label: 'Categories', icon: <PieChart size={20} /> },
-    { path: '/reports', label: 'Reports', icon: <BarChart3 size={20} /> },
+    { path: '/dashboard', label: 'Панель управления', icon: <LayoutDashboard size={20} /> },
+    { path: '/transactions', label: 'Транзакции', icon: <DollarSign size={20} /> },
+    { path: '/categories', label: 'Категории', icon: <PieChart size={20} /> },
+    { path: '/reports', label: 'Отчеты', icon: <BarChart3 size={20} /> },
   ];
 
   return (
@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-md">
         <div className="p-4 border-b">
-          <h1 className="text-xl font-bold text-gray-800">Finance Tracker</h1>
+          <h1 className="text-xl font-bold text-gray-800">Финансовый Трекер</h1>
         </div>
         
         <div className="p-4 border-b">
@@ -66,7 +66,7 @@ const Layout: React.FC = () => {
             className="flex items-center space-x-2 p-2 w-full text-left rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <LogOut size={20} />
-            <span>Logout</span>
+            <span>Выйти</span>
           </button>
         </div>
       </div>
