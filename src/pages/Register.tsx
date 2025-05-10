@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -11,6 +10,7 @@ const Register: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,32 +27,10 @@ const Register: React.FC = () => {
     setLoading(true);
     
     try {
-      // First sign up the user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Insert the additional user data into our users table
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert([
-            {
-              id: authData.user.id,
-              username,
-              email,
-            }
-          ]);
-
-        if (profileError) throw profileError;
-        
-        navigate('/dashboard');
-      }
+      await register(username, email, password);
+      navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Failed to create an account');
+      setError(err.response?.data?.message || 'Failed to create an account');
       console.error('Registration error:', err);
     } finally {
       setLoading(false);
