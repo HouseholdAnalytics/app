@@ -81,7 +81,7 @@ const Categories: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between mt-5 items-center mb-6">
         <h1 className="text-2xl font-bold">Категории</h1>
         <button
           onClick={() => setShowForm(!showForm)}
