@@ -47,6 +47,17 @@ interface StatisticalMetrics {
   };
 }
 
+interface CategoryStatistics {
+  name: string;
+  type: string;
+  mean: number;
+  median: number;
+  mode: number;
+  variance: number;
+  standardDeviation: number;
+  transactions: number[];
+}
+
 interface ReportData {
   period: {
     from: string;
@@ -64,6 +75,7 @@ interface ReportData {
     total: number;
   }[];
   transactions: Transaction[];
+  categoryStatistics?: CategoryStatistics[];
 }
 
 const Reports: React.FC = () => {
@@ -162,6 +174,68 @@ const Reports: React.FC = () => {
     };
   };
 
+  const calculateCategoryStatistics = (transactions: Transaction[]): CategoryStatistics[] => {
+    // Группируем транзакции по категориям
+    const categoriesMap = new Map<string, { type: string; amounts: number[] }>();
+    
+    transactions.forEach(transaction => {
+      const key = transaction.category.name;
+      if (!categoriesMap.has(key)) {
+        categoriesMap.set(key, {
+          type: transaction.category.type,
+          amounts: []
+        });
+      }
+      categoriesMap.get(key)?.amounts.push(Number(transaction.amount));
+    });
+
+    // Рассчитываем статистику для каждой категории
+    return Array.from(categoriesMap.entries()).map(([name, data]) => {
+      const amounts = data.amounts;
+      
+      // Среднее значение
+      const mean = amounts.reduce((sum, val) => sum + val, 0) / amounts.length;
+
+      // Медиана
+      const sorted = [...amounts].sort((a, b) => a - b);
+      const median = amounts.length % 2 === 0
+        ? (sorted[amounts.length / 2 - 1] + sorted[amounts.length / 2]) / 2
+        : sorted[Math.floor(amounts.length / 2)];
+
+      // Мода
+      const frequency: { [key: number]: number } = {};
+      let maxFreq = 0;
+      let mode = amounts[0];
+      
+      amounts.forEach(val => {
+        frequency[val] = (frequency[val] || 0) + 1;
+        if (frequency[val] > maxFreq) {
+          maxFreq = frequency[val];
+          mode = val;
+        }
+      });
+
+      // Дисперсия
+      const variance = amounts.length > 1
+        ? amounts.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (amounts.length - 1)
+        : 0;
+
+      // Среднеквадратичное отклонение
+      const standardDeviation = Math.sqrt(variance);
+
+      return {
+        name,
+        type: data.type,
+        mean,
+        median,
+        mode,
+        variance,
+        standardDeviation,
+        transactions: amounts
+      };
+    });
+  };
+
   const generateReport = async () => {
     try {
       setLoading(true);
@@ -169,9 +243,12 @@ const Reports: React.FC = () => {
       
       const response = await axios.post('http://localhost:3000/reports/generate/monthly', dateRange);
       const statistics = calculateStatistics(response.data.transactions);
+      const categoryStats = calculateCategoryStatistics(response.data.transactions);
+      
       setReportData({
         ...response.data,
-        statistics
+        statistics,
+        categoryStatistics: categoryStats
       });
     } catch (err) {
       console.error('Error generating report:', err);
@@ -221,6 +298,106 @@ const Reports: React.FC = () => {
     } catch (err) {
       console.error('Error loading report:', err);
       setError('Не удалось загрузить отчет');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const downloadReport = async (id: number) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await axios.get(`http://localhost:3000/reports/${id}`);
+      const reportResponse = await axios.post('http://localhost:3000/reports/generate/monthly', {
+        from: response.data.period_from,
+        to: response.data.period_to,
+      });
+      
+      const statistics = calculateStatistics(reportResponse.data.transactions);
+      const tempReportData = {
+        ...reportResponse.data,
+        statistics,
+        period: {
+          from: response.data.period_from,
+          to: response.data.period_to,
+        }
+      };
+
+      // Создаем временный объект reportData для экспорта
+      const rows = [
+        // Заголовок отчета
+        [`Финансовый отчет: ${format(new Date(tempReportData.period.from), 'dd.MM.yyyy')} - ${format(new Date(tempReportData.period.to), 'dd.MM.yyyy')}`],
+        [''],
+        
+        // Общая сводка
+        ['Общая сводка'],
+        ['Общий доход', `$${tempReportData.summary.totalIncome.toFixed(2)}`],
+        ['Общий расход', `$${tempReportData.summary.totalExpense.toFixed(2)}`],
+        ['Баланс', `$${tempReportData.summary.balance.toFixed(2)}`],
+        [''],
+        
+        // Статистика доходов
+        ['Статистика доходов'],
+        ['Показатель', 'Значение'],
+        ['Среднее значение', `$${formatNumber(tempReportData.statistics.income.mean)}`],
+        ['Медиана', `$${formatNumber(tempReportData.statistics.income.median)}`],
+        ['Мода', `$${formatNumber(tempReportData.statistics.income.mode)}`],
+        ['Дисперсия', `$${formatNumber(tempReportData.statistics.income.variance)}`],
+        ['Среднеквадратичное отклонение', `$${formatNumber(tempReportData.statistics.income.standardDeviation)}`],
+        [''],
+        
+        // Статистика расходов
+        ['Статистика расходов'],
+        ['Показатель', 'Значение'],
+        ['Среднее значение', `$${formatNumber(tempReportData.statistics.expense.mean)}`],
+        ['Медиана', `$${formatNumber(tempReportData.statistics.expense.median)}`],
+        ['Мода', `$${formatNumber(tempReportData.statistics.expense.mode)}`],
+        ['Дисперсия', `$${formatNumber(tempReportData.statistics.expense.variance)}`],
+        ['Среднеквадратичное отклонение', `$${formatNumber(tempReportData.statistics.expense.standardDeviation)}`],
+        [''],
+        
+        // Категории
+        ['Разбивка по категориям'],
+        ['Категория', 'Тип', 'Сумма', '% от общего'],
+        ...tempReportData.categories.map((category: { name: string; type: string; total: number }) => [
+          category.name,
+          category.type === 'income' ? 'Доход' : 'Расход',
+          `$${category.total.toFixed(2)}`,
+          `${((category.total / (category.type === 'income' ? tempReportData.summary.totalIncome : tempReportData.summary.totalExpense)) * 100).toFixed(1)}%`
+        ]),
+        [''],
+        
+        // Транзакции
+        ['Список транзакций'],
+        ['Дата', 'Категория', 'Тип', 'Описание', 'Сумма'],
+        ...tempReportData.transactions.map((transaction: Transaction) => [
+          format(new Date(transaction.date), 'dd.MM.yyyy'),
+          transaction.category.name,
+          transaction.category.type === 'income' ? 'Доход' : 'Расход',
+          transaction.comment || '-',
+          `${transaction.category.type === 'income' ? '+' : '-'}$${Number(transaction.amount).toFixed(2)}`
+        ])
+      ];
+
+      const csvContent = rows.map(row => 
+        row.map((cell: string | number) => 
+          typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+        ).join(',')
+      ).join('\n');
+
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `financial_report_${format(new Date(tempReportData.period.from), 'yyyy-MM-dd')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error downloading report:', err);
+      setError('Не удалось скачать отчет');
     } finally {
       setLoading(false);
     }
@@ -290,6 +467,99 @@ const Reports: React.FC = () => {
       return '0.00';
     }
     return Number(value).toFixed(2);
+  };
+
+  const exportToCSV = () => {
+    if (!reportData) return;
+
+    // Подготовка данных для CSV
+    const rows = [
+      // Заголовок отчета
+      [`Финансовый отчет: ${format(new Date(reportData.period.from), 'dd.MM.yyyy')} - ${format(new Date(reportData.period.to), 'dd.MM.yyyy')}`],
+      [''],
+      
+      // Общая сводка
+      ['Общая сводка'],
+      ['Общий доход', `$${reportData.summary.totalIncome.toFixed(2)}`],
+      ['Общий расход', `$${reportData.summary.totalExpense.toFixed(2)}`],
+      ['Баланс', `$${reportData.summary.balance.toFixed(2)}`],
+      [''],
+      
+      // Статистика доходов
+      ['Статистика доходов'],
+      ['Показатель', 'Значение'],
+      ['Среднее значение', `$${formatNumber(reportData.statistics.income.mean)}`],
+      ['Медиана', `$${formatNumber(reportData.statistics.income.median)}`],
+      ['Мода', `$${formatNumber(reportData.statistics.income.mode)}`],
+      ['Дисперсия', `$${formatNumber(reportData.statistics.income.variance)}`],
+      ['Среднеквадратичное отклонение', `$${formatNumber(reportData.statistics.income.standardDeviation)}`],
+      [''],
+      
+      // Статистика расходов
+      ['Статистика расходов'],
+      ['Показатель', 'Значение'],
+      ['Среднее значение', `$${formatNumber(reportData.statistics.expense.mean)}`],
+      ['Медиана', `$${formatNumber(reportData.statistics.expense.median)}`],
+      ['Мода', `$${formatNumber(reportData.statistics.expense.mode)}`],
+      ['Дисперсия', `$${formatNumber(reportData.statistics.expense.variance)}`],
+      ['Среднеквадратичное отклонение', `$${formatNumber(reportData.statistics.expense.standardDeviation)}`],
+      [''],
+      
+      // Статистика по категориям
+      ['Статистика по категориям'],
+      ['Категория', 'Тип', 'Среднее значение', 'Медиана', 'Мода', 'Дисперсия', 'Среднеквадратичное отклонение', 'Количество транзакций'],
+      ...reportData.categoryStatistics?.map(stat => [
+        stat.name,
+        stat.type === 'income' ? 'Доход' : 'Расход',
+        `$${formatNumber(stat.mean)}`,
+        `$${formatNumber(stat.median)}`,
+        `$${formatNumber(stat.mode)}`,
+        `$${formatNumber(stat.variance)}`,
+        `$${formatNumber(stat.standardDeviation)}`,
+        stat.transactions.length
+      ]) || [],
+      [''],
+      
+      // Категории
+      ['Разбивка по категориям'],
+      ['Категория', 'Тип', 'Сумма', '% от общего'],
+      ...reportData.categories.map(category => [
+        category.name,
+        category.type === 'income' ? 'Доход' : 'Расход',
+        `$${category.total.toFixed(2)}`,
+        `${((category.total / (category.type === 'income' ? reportData.summary.totalIncome : reportData.summary.totalExpense)) * 100).toFixed(1)}%`
+      ]),
+      [''],
+      
+      // Транзакции
+      ['Список транзакций'],
+      ['Дата', 'Категория', 'Тип', 'Описание', 'Сумма'],
+      ...reportData.transactions.map(transaction => [
+        format(new Date(transaction.date), 'dd.MM.yyyy'),
+        transaction.category.name,
+        transaction.category.type === 'income' ? 'Доход' : 'Расход',
+        transaction.comment || '-',
+        `${transaction.category.type === 'income' ? '+' : '-'}$${Number(transaction.amount).toFixed(2)}`
+      ])
+    ];
+
+    // Преобразование массива в CSV строку
+    const csvContent = rows.map(row => 
+      row.map(cell => 
+        typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+      ).join(',')
+    ).join('\n');
+
+    // Создание и скачивание файла
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `financial_report_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -380,12 +650,18 @@ const Reports: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {format(new Date(report.created_at), 'dd MMM yyyy HH:mm')}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                       <button
                         onClick={() => loadReport(report.id)}
                         className="text-blue-600 hover:text-blue-900"
                       >
-                        Загрузить
+                        Просмотреть
+                      </button>
+                      <button
+                        onClick={() => downloadReport(report.id)}
+                        className="text-green-600 hover:text-green-900"
+                      >
+                        Скачать
                       </button>
                     </td>
                   </tr>
@@ -414,10 +690,7 @@ const Reports: React.FC = () => {
                 <span>Сохранить отчет</span>
               </button>
               <button
-                onClick={() => {
-                  // In a real app, this would generate a PDF or CSV
-                  alert('Функция экспорта будет реализована позже');
-                }}
+                onClick={exportToCSV}
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
               >
                 <Download size={18} />
@@ -511,6 +784,53 @@ const Reports: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          
+          {/* Category Statistics */}
+          <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h3 className="text-lg font-semibold mb-4">Статистика по категориям</h3>
+            <div className="grid grid-cols-1 gap-6">
+              {reportData.categoryStatistics?.map((stat, index) => (
+                <div key={index} className={`p-4 rounded-lg ${
+                  stat.type === 'income' ? 'bg-green-50' : 'bg-red-50'
+                }`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-medium">{stat.name}</h4>
+                    <span className={`px-2 py-1 text-sm font-semibold rounded-full ${
+                      stat.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {stat.type === 'income' ? 'Доход' : 'Расход'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Среднее значение:</p>
+                      <p className="font-medium">${formatNumber(stat.mean)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Медиана:</p>
+                      <p className="font-medium">${formatNumber(stat.median)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Мода:</p>
+                      <p className="font-medium">${formatNumber(stat.mode)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Дисперсия:</p>
+                      <p className="font-medium">${formatNumber(stat.variance)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Среднеквадратичное отклонение:</p>
+                      <p className="font-medium">${formatNumber(stat.standardDeviation)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Количество транзакций:</p>
+                      <p className="font-medium">{stat.transactions.length}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           
