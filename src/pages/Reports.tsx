@@ -490,14 +490,28 @@ const Reports: React.FC = () => {
       
       // Статистика по категориям
       ['Статистика по категориям'],
-      ['Категория', 'Тип', 'Медиана', 'Мода', 'Количество транзакций'],
-      ...reportData.categoryStatistics?.map(stat => [
-        stat.name,
-        stat.type === 'income' ? 'Доход' : 'Расход',
-        `$${formatNumber(stat.median)}`,
-        `$${formatNumber(stat.mode)}`,
-        stat.transactions.length
-      ]) || [],
+      ['Категория', 'Тип', 'Среднее', 'Медиана', 'Мода', 'Дисперсия', 'Ср. откл.', 'Кол-во транзакций'],
+      ...reportData.categoryStatistics?.map((stat, index) => {
+        // Рассчитываем среднее значение
+        const mean = stat.transactions.reduce((sum, val) => sum + val, 0) / stat.transactions.length;
+        // Рассчитываем дисперсию
+        const variance = stat.transactions.length > 1
+          ? stat.transactions.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (stat.transactions.length - 1)
+          : 0;
+        // Рассчитываем среднеквадратичное отклонение
+        const standardDeviation = Math.sqrt(variance);
+
+        return [
+          stat.name,
+          stat.type === 'income' ? 'Доход' : 'Расход',
+          `${formatNumber(mean)}`,
+          `${formatNumber(stat.median)}`,
+          `${formatNumber(stat.mode)}`,
+          `${formatNumber(variance)}`,
+          `${formatNumber(standardDeviation)}`,
+          `${stat.transactions.length}`
+        ];
+      }) || [],
       [''],
       
       // Категории
@@ -776,35 +790,58 @@ const Reports: React.FC = () => {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Категория</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тип</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Среднее</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Медиана</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Мода</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Дисперсия</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ср. откл.</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Кол-во транзакций</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {reportData.categoryStatistics?.map((stat, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {stat.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          stat.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {stat.type === 'income' ? 'Доход' : 'Расход'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                        ${formatNumber(stat.median)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                        ${formatNumber(stat.mode)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
-                        {stat.transactions.length}
-                      </td>
-                    </tr>
-                  ))}
+                  {reportData.categoryStatistics?.map((stat, index) => {
+                    // Рассчитываем среднее значение
+                    const mean = stat.transactions.reduce((sum, val) => sum + val, 0) / stat.transactions.length;
+                    // Рассчитываем дисперсию
+                    const variance = stat.transactions.length > 1
+                      ? stat.transactions.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / (stat.transactions.length - 1)
+                      : 0;
+                    // Рассчитываем среднеквадратичное отклонение
+                    const standardDeviation = Math.sqrt(variance);
+
+                    return (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {stat.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            stat.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {stat.type === 'income' ? 'Доход' : 'Расход'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
+                          ${formatNumber(mean)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
+                          ${formatNumber(stat.median)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
+                          ${formatNumber(stat.mode)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
+                          ${formatNumber(variance)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
+                          ${formatNumber(standardDeviation)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
+                          {stat.transactions.length}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
