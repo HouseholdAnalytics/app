@@ -286,7 +286,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">Баланс</p>
-              <p className="text-xl font-bold">${summary.balance.toFixed(2)}</p>
+              <p className="text-xl font-bold">{summary.balance.toFixed(2)} ₽</p>
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-sm text-gray-500">Доходы</p>
               <p className="text-xl font-bold">
-                ${summary.totalIncome.toFixed(2)}
+                {summary.totalIncome.toFixed(2)} ₽
               </p>
             </div>
           </div>
@@ -313,7 +313,7 @@ const Dashboard: React.FC = () => {
             <div>
               <p className="text-sm text-gray-500">Расходы</p>
               <p className="text-xl font-bold">
-                ${summary.totalExpense.toFixed(2)}
+                {summary.totalExpense.toFixed(2)} ₽
               </p>
             </div>
           </div>
@@ -420,9 +420,9 @@ const Dashboard: React.FC = () => {
                       callbacks: {
                         label: function (context) {
                           const value = context.raw as number;
-                          return `${context.dataset.label}: $${value.toFixed(
+                          return `${context.dataset.label}: ${value.toFixed(
                             2
-                          )}`;
+                          )} ₽`;
                         },
                       },
                     },
@@ -479,8 +479,8 @@ const Dashboard: React.FC = () => {
                           : "text-red-600"
                       }`}
                     >
-                      {transaction.category.type === "income" ? "+" : "-"}$
-                      {Number(transaction.amount).toFixed(2)}
+                      {transaction.category.type === "income" ? "+" : "-"}{" "}
+                      {Number(transaction.amount).toFixed(2)} ₽
                     </td>
                   </tr>
                 ))}

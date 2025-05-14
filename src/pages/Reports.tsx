@@ -362,9 +362,9 @@ const Reports: React.FC = () => {
 
         // Общая сводка
         ["Общая сводка"],
-        ["Общий доход", `$${tempReportData.summary.totalIncome.toFixed(2)}`],
-        ["Общий расход", `$${tempReportData.summary.totalExpense.toFixed(2)}`],
-        ["Баланс", `$${tempReportData.summary.balance.toFixed(2)}`],
+        ["Общий доход", `${tempReportData.summary.totalIncome.toFixed(2)} ₽`],
+        ["Общий расход", `${tempReportData.summary.totalExpense.toFixed(2)} ₽`],
+        ["Баланс", `${tempReportData.summary.balance.toFixed(2)} ₽`],
         [""],
 
         // Статистика доходов
@@ -372,22 +372,22 @@ const Reports: React.FC = () => {
         ["Показатель", "Значение"],
         [
           "Среднее значение",
-          `$${formatNumber(tempReportData.statistics.income.mean)}`,
+          `${formatNumber(tempReportData.statistics.income.mean)} ₽`,
         ],
         [
           "Медиана",
-          `$${formatNumber(tempReportData.statistics.income.median)}`,
+          `${formatNumber(tempReportData.statistics.income.median)} ₽`,
         ],
-        ["Мода", `$${formatNumber(tempReportData.statistics.income.mode)}`],
+        ["Мода", `${formatNumber(tempReportData.statistics.income.mode)} ₽`],
         [
           "Дисперсия",
-          `$${formatNumber(tempReportData.statistics.income.variance)}`,
+          `${formatNumber(tempReportData.statistics.income.variance)} ₽`,
         ],
         [
           "Среднеквадратичное отклонение",
-          `$${formatNumber(
+          `${formatNumber(
             tempReportData.statistics.income.standardDeviation
-          )}`,
+          )} ₽`,
         ],
         [""],
 
@@ -396,22 +396,22 @@ const Reports: React.FC = () => {
         ["Показатель", "Значение"],
         [
           "Среднее значение",
-          `$${formatNumber(tempReportData.statistics.expense.mean)}`,
+          `${formatNumber(tempReportData.statistics.expense.mean)} ₽`,
         ],
         [
           "Медиана",
-          `$${formatNumber(tempReportData.statistics.expense.median)}`,
+          `${formatNumber(tempReportData.statistics.expense.median)} ₽`,
         ],
-        ["Мода", `$${formatNumber(tempReportData.statistics.expense.mode)}`],
+        ["Мода", `${formatNumber(tempReportData.statistics.expense.mode)} ₽`],
         [
           "Дисперсия",
-          `$${formatNumber(tempReportData.statistics.expense.variance)}`,
+          `${formatNumber(tempReportData.statistics.expense.variance)} ₽`,
         ],
         [
           "Среднеквадратичное отклонение",
-          `$${formatNumber(
+          `${formatNumber(
             tempReportData.statistics.expense.standardDeviation
-          )}`,
+          )} ₽`,
         ],
         [""],
 
@@ -422,7 +422,7 @@ const Reports: React.FC = () => {
           (category: { name: string; type: string; total: number }) => [
             category.name,
             category.type === "income" ? "Доход" : "Расход",
-            `$${category.total.toFixed(2)}`,
+            `${category.total.toFixed(2)} ₽`,
             `${(
               (category.total /
                 (category.type === "income"
@@ -442,9 +442,9 @@ const Reports: React.FC = () => {
           transaction.category.name,
           transaction.category.type === "income" ? "Доход" : "Расход",
           transaction.comment || "-",
-          `${transaction.category.type === "income" ? "+" : "-"}$${Number(
+          `${transaction.category.type === "income" ? "+" : "-"}${Number(
             transaction.amount
-          ).toFixed(2)}`,
+          ).toFixed(2)} ₽`,
         ]),
       ];
 
@@ -571,9 +571,9 @@ const Reports: React.FC = () => {
 
       // Общая сводка
       ["Общая сводка"],
-      ["Общий доход", `$${reportData.summary.totalIncome.toFixed(2)}`],
-      ["Общий расход", `$${reportData.summary.totalExpense.toFixed(2)}`],
-      ["Баланс", `$${reportData.summary.balance.toFixed(2)}`],
+      ["Общий доход", `${reportData.summary.totalIncome.toFixed(2)} ₽`],
+      ["Общий расход", `${reportData.summary.totalExpense.toFixed(2)} ₽`],
+      ["Баланс", `${reportData.summary.balance.toFixed(2)} ₽`],
       [""],
 
       // Статистика доходов
@@ -581,14 +581,14 @@ const Reports: React.FC = () => {
       ["Показатель", "Значение"],
       [
         "Среднее значение",
-        `$${formatNumber(reportData.statistics.income.mean)}`,
+        `${formatNumber(reportData.statistics.income.mean)} ₽`,
       ],
-      ["Медиана", `$${formatNumber(reportData.statistics.income.median)}`],
-      ["Мода", `$${formatNumber(reportData.statistics.income.mode)}`],
-      ["Дисперсия", `$${formatNumber(reportData.statistics.income.variance)}`],
+      ["Медиана", `${formatNumber(reportData.statistics.income.median)} ₽`],
+      ["Мода", `${formatNumber(reportData.statistics.income.mode)} ₽`],
+      ["Дисперсия", `${formatNumber(reportData.statistics.income.variance)} ₽`],
       [
         "Среднеквадратичное отклонение",
-        `$${formatNumber(reportData.statistics.income.standardDeviation)}`,
+        `${formatNumber(reportData.statistics.income.standardDeviation)} ₽`,
       ],
       [""],
 
@@ -597,14 +597,14 @@ const Reports: React.FC = () => {
       ["Показатель", "Значение"],
       [
         "Среднее значение",
-        `$${formatNumber(reportData.statistics.expense.mean)}`,
+        `${formatNumber(reportData.statistics.expense.mean)} ₽`,
       ],
-      ["Медиана", `$${formatNumber(reportData.statistics.expense.median)}`],
-      ["Мода", `$${formatNumber(reportData.statistics.expense.mode)}`],
-      ["Дисперсия", `$${formatNumber(reportData.statistics.expense.variance)}`],
+      ["Медиана", `${formatNumber(reportData.statistics.expense.median)} ₽`],
+      ["Мода", `${formatNumber(reportData.statistics.expense.mode)} ₽`],
+      ["Дисперсия", `${formatNumber(reportData.statistics.expense.variance)} ₽`],
       [
         "Среднеквадратичное отклонение",
-        `$${formatNumber(reportData.statistics.expense.standardDeviation)}`,
+        `${formatNumber(reportData.statistics.expense.standardDeviation)} ₽`,
       ],
       [""],
 
@@ -656,7 +656,7 @@ const Reports: React.FC = () => {
       ...reportData.categories.map((category) => [
         category.name,
         category.type === "income" ? "Доход" : "Расход",
-        `$${category.total.toFixed(2)}`,
+        `${category.total.toFixed(2)} ₽`,
         `${(
           (category.total /
             (category.type === "income"
@@ -675,9 +675,9 @@ const Reports: React.FC = () => {
         transaction.category.name,
         transaction.category.type === "income" ? "Доход" : "Расход",
         transaction.comment || "-",
-        `${transaction.category.type === "income" ? "+" : "-"}$${Number(
+        `${transaction.category.type === "income" ? "+" : "-"}${Number(
           transaction.amount
-        ).toFixed(2)}`,
+        ).toFixed(2)} ₽`,
       ]),
     ];
 
@@ -871,14 +871,14 @@ const Reports: React.FC = () => {
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-500 font-medium">Общий доход</p>
               <p className="text-2xl font-bold text-blue-700">
-                ${reportData.summary.totalIncome.toFixed(2)}
+                {reportData.summary.totalIncome.toFixed(2)} ₽
               </p>
             </div>
 
             <div className="bg-red-50 p-4 rounded-lg">
               <p className="text-sm text-red-500 font-medium">Общий расход</p>
               <p className="text-2xl font-bold text-red-700">
-                ${reportData.summary.totalExpense.toFixed(2)}
+                {reportData.summary.totalExpense.toFixed(2)} ₽
               </p>
             </div>
 
@@ -903,7 +903,7 @@ const Reports: React.FC = () => {
                     : "text-red-700"
                 }`}
               >
-                ${reportData.summary.balance.toFixed(2)}
+                {reportData.summary.balance.toFixed(2)} ₽
               </p>
             </div>
           </div>
@@ -925,25 +925,25 @@ const Reports: React.FC = () => {
                       Среднее значение:
                     </span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.income?.mean)}
+                      {formatNumber(reportData.statistics?.income?.mean)} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Медиана:</span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.income?.median)}
+                      {formatNumber(reportData.statistics?.income?.median)} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Мода:</span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.income?.mode)}
+                      {formatNumber(reportData.statistics?.income?.mode)} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Дисперсия:</span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.income?.variance)}
+                      {formatNumber(reportData.statistics?.income?.variance)} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -951,10 +951,9 @@ const Reports: React.FC = () => {
                       Среднеквадратичное отклонение:
                     </span>
                     <span className="font-medium">
-                      $
                       {formatNumber(
                         reportData.statistics?.income?.standardDeviation
-                      )}
+                      )} ₽
                     </span>
                   </div>
                 </div>
@@ -971,25 +970,27 @@ const Reports: React.FC = () => {
                       Среднее значение:
                     </span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.expense?.mean)}
+                      {formatNumber(reportData.statistics?.expense?.mean)} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Медиана:</span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.expense?.median)}
+                      {formatNumber(reportData.statistics?.expense?.median)} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Мода:</span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.expense?.mode)}
+                      {formatNumber(reportData.statistics?.expense?.mode)} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Дисперсия:</span>
                     <span className="font-medium">
-                      ${formatNumber(reportData.statistics?.expense?.variance)}
+                      {formatNumber(
+                        reportData.statistics?.expense?.variance
+                      )} ₽
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -997,10 +998,9 @@ const Reports: React.FC = () => {
                       Среднеквадратичное отклонение:
                     </span>
                     <span className="font-medium">
-                      $
                       {formatNumber(
                         reportData.statistics?.expense?.standardDeviation
-                      )}
+                      )} ₽
                     </span>
                   </div>
                 </div>
@@ -1078,19 +1078,19 @@ const Reports: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          ${formatNumber(mean)}
+                          {formatNumber(mean)} ₽
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          ${formatNumber(stat.median)}
+                          {formatNumber(stat.median)} ₽
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          ${formatNumber(stat.mode)}
+                          {formatNumber(stat.mode)} ₽
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          ${formatNumber(variance)}
+                          {formatNumber(variance)} ₽
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
-                          ${formatNumber(standardDeviation)}
+                          {formatNumber(standardDeviation)} ₽
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">
                           {stat.transactions.length}
@@ -1194,7 +1194,7 @@ const Reports: React.FC = () => {
                               : "text-red-600"
                           }`}
                         >
-                          ${category.total.toFixed(2)}
+                          {category.total.toFixed(2)} ₽
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                           {percentage.toFixed(1)}%
@@ -1255,8 +1255,8 @@ const Reports: React.FC = () => {
                             : "text-red-600"
                         }`}
                       >
-                        {transaction.category.type === "income" ? "+" : "-"}$
-                        {Number(transaction.amount).toFixed(2)}
+                        {transaction.category.type === "income" ? "+" : "-"}{" "}
+                        {Number(transaction.amount).toFixed(2)} ₽
                       </td>
                     </tr>
                   ))}
