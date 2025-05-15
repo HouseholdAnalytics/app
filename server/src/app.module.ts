@@ -13,10 +13,10 @@ import { AuthModule } from './auth/auth.module';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '1',
-      database: 'test',
+      password: 'postgres',
+      database: 'postgres',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // Only for development
+      synchronize: true,
     }),
     UsersModule,
     CategoriesModule,

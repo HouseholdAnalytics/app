@@ -11,28 +11,44 @@ export class CategoriesService {
     private categoriesRepository: Repository<Category>,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    const category = this.categoriesRepository.create(createCategoryDto);
+  async create(createCategoryDto: CreateCategoryDto, userId: number): Promise<Category> {
+    const category = this.categoriesRepository.create({
+      ...createCategoryDto,
+      user_id: userId
+    });
     return this.categoriesRepository.save(category);
   }
 
-  async findAll(): Promise<Category[]> {
-    return this.categoriesRepository.find();
-  }
-
-  async findOne(id: number): Promise<Category> {
-    return this.categoriesRepository.findOne({ where: { id } });
-  }
-
-  async findByType(type: string): Promise<Category[]> {
+  async findAll(userId: number): Promise<Category[]> {
     return this.categoriesRepository.find({
-      where: { type: type as CategoryType },
+      where: { user_id: userId }
     });
   }
 
-  async remove(id: number): Promise<void> {
+  async findOne(id: number, userId: number): Promise<Category> {
     const category = await this.categoriesRepository.findOne({
-      where: { id },
+      where: { id, user_id: userId }
+    });
+    
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    
+    return category;
+  }
+
+  async findByType(type: string, userId: number): Promise<Category[]> {
+    return this.categoriesRepository.find({
+      where: {
+        type: type as CategoryType,
+        user_id: userId
+      }
+    });
+  }
+
+  async remove(id: number, userId: number): Promise<void> {
+    const category = await this.categoriesRepository.findOne({
+      where: { id, user_id: userId },
       relations: ['transactions'],
     });
 

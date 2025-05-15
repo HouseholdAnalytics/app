@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
 import { Transaction } from '../transactions/transaction.entity';
 import { Report } from '../reports/report.entity';
+import { Category } from '../categories/category.entity';
 
 @Entity('users')
 export class User {
@@ -24,4 +25,7 @@ export class User {
 
   @OneToMany(() => Report, report => report.user)
   reports: Report[];
+
+  @OneToMany(() => Category, category => category.user)
+  categories: Category[];
 }
