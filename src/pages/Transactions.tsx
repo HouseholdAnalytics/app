@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format } from "date-fns";
 import { Plus, Trash2, Filter } from "lucide-react";
+import { useAuth } from '../contexts/AuthContext';
+import { API_URL } from '../config';
 
 interface Category {
   id: number;
@@ -38,18 +40,33 @@ const Transactions: React.FC = () => {
     comment: "",
   });
 
+  const { token } = useAuth();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         setError("");
-        const [transactionsRes, categoriesRes] = await Promise.all([
-          axios.get("http://localhost:3000/transactions"),
-          axios.get("http://localhost:3000/categories"),
+        const [transactionsResponse, categoriesResponse] = await Promise.all([
+          fetch(`${API_URL}/transactions`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }),
+          fetch(`${API_URL}/categories`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
         ]);
 
-        setTransactions(transactionsRes.data);
-        setCategories(categoriesRes.data);
+        const [transactionsData, categoriesData] = await Promise.all([
+          transactionsResponse.json(),
+          categoriesResponse.json()
+        ]);
+
+        setTransactions(transactionsData);
+        setCategories(categoriesData);
       } catch (err: any) {
         console.error("Error fetching data:", err);
         setError(err.response?.data?.message || "Не удалось загрузить данные");
@@ -59,7 +76,7 @@ const Transactions: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [token]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -82,18 +99,20 @@ const Transactions: React.FC = () => {
 
     try {
       setError("");
-      const response = await axios.post("http://localhost:3000/transactions", {
-        ...formData,
-        amount: parseFloat(formData.amount),
-        category_id: parseInt(formData.category_id),
+      const response = await fetch(`${API_URL}/transactions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...formData,
+          amount: parseFloat(formData.amount),
+          category_id: parseInt(formData.category_id),
+        })
       });
-
-      // Fetch the complete transaction data with category
-      const transactionResponse = await axios.get(
-        `http://localhost:3000/transactions/${response.data.id}`
-      );
-
-      setTransactions([transactionResponse.data, ...transactions]);
+      const data = await response.json();
+      setTransactions([data, ...transactions]);
       setShowForm(false);
       setFormData({
         category_id: "",
@@ -113,7 +132,12 @@ const Transactions: React.FC = () => {
     }
 
     try {
-      await axios.delete(`http://localhost:3000/transactions/${id}`);
+      await fetch(`${API_URL}/transactions/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setTransactions(transactions.filter((t) => t.id !== id));
     } catch (err) {
       console.error("Error deleting transaction:", err);

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { API_URL } from '../config';
 
 interface Category {
   id: number;
@@ -21,13 +23,20 @@ const Categories: React.FC = () => {
     type: 'income' as 'income' | 'expense',
   });
 
+  const { token } = useAuth();
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/categories');
-        setCategories(response.data);
-      } catch (err) {
-        console.error('Error fetching categories:', err);
+        const response = await fetch(`${API_URL}/categories`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
         setError('Не удалось загрузить категории');
       } finally {
         setLoading(false);
@@ -35,7 +44,7 @@ const Categories: React.FC = () => {
     };
 
     fetchCategories();
-  }, []);
+  }, [token]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -46,8 +55,16 @@ const Categories: React.FC = () => {
     e.preventDefault();
     
     try {
-      const response = await axios.post('http://localhost:3000/categories', formData);
-      setCategories([...categories, response.data]);
+      const response = await fetch(`${API_URL}/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+      const data = await response.json();
+      setCategories([...categories, data]);
       setShowForm(false);
       setFormData({
         name: '',
@@ -65,7 +82,12 @@ const Categories: React.FC = () => {
     }
     
     try {
-      await axios.delete(`http://localhost:3000/categories/${id}`);
+      await fetch(`${API_URL}/categories/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       setCategories(categories.filter(c => c.id !== id));
     } catch (err) {
       console.error('Error deleting category:', err);

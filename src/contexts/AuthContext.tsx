@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { API_URL } from '../config';
 import axios from 'axios';
 
 interface User {
@@ -42,36 +43,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      const response = await axios.post('http://localhost:3000/auth/login', { email, password });
-      const { access_token, user } = response.data;
-      
-      setToken(access_token);
-      setUser(user);
-      
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      console.log('Using API URL:', API_URL);
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        throw new Error('Неверные учетные данные');
+      }
+
+      const data = await response.json();
+      setUser(data.user);
+      setToken(data.access_token);
+      localStorage.setItem('token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
     } catch (error) {
       console.error('Login error:', error);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
   const register = async (username: string, email: string, password: string) => {
     try {
-      setLoading(true);
-      await axios.post('http://localhost:3000/auth/register', { username, email, password });
-      // After registration, log the user in
-      await login(email, password);
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, email, password })
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка при регистрации');
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 

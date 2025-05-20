@@ -24,6 +24,6 @@ services:
     container_name: finance-frontend
     ports:
       - "80:80"
-    depends_on:
-      - backend
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
     restart: unless-stopped

@@ -17,6 +17,8 @@ import {
 import { format, parseISO } from "date-fns";
 import { ru } from "date-fns/locale";
 import { DollarSign, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { useAuth } from '../contexts/AuthContext';
+import { API_URL } from '../config';
 
 // Register ChartJS components
 ChartJS.register(
@@ -53,19 +55,25 @@ const Dashboard: React.FC = () => {
     totalExpense: 0,
     balance: 0,
   });
+  const { token } = useAuth();
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/transactions");
-        setTransactions(response.data);
+        const response = await fetch(`${API_URL}/transactions`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        setTransactions(data);
 
         // Calculate summary
-        const income = response.data
+        const income = data
           .filter((t: Transaction) => t.category.type === "income")
           .reduce((sum: number, t: Transaction) => sum + Number(t.amount), 0);
 
-        const expense = response.data
+        const expense = data
           .filter((t: Transaction) => t.category.type === "expense")
           .reduce((sum: number, t: Transaction) => sum + Number(t.amount), 0);
 
@@ -83,7 +91,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchTransactions();
-  }, []);
+  }, [token]);
 
   // Prepare data for charts
   const prepareChartData = () => {

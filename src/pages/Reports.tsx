@@ -13,6 +13,8 @@ import {
   Title,
 } from "chart.js";
 import { FileText, Download, Calendar } from "lucide-react";
+import { useAuth } from '../contexts/AuthContext';
+import { API_URL } from '../config';
 
 // Register ChartJS components
 ChartJS.register(
@@ -107,17 +109,23 @@ const Reports: React.FC = () => {
     to: format(new Date(), "yyyy-MM-dd"),
   });
 
-  useEffect(() => {
-    const fetchSavedReports = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/reports");
-        setSavedReports(response.data);
-      } catch (err) {
-        console.error("Error fetching saved reports:", err);
-        setError("Не удалось загрузить сохраненные отчеты");
-      }
-    };
+  const { token } = useAuth();
 
+  const fetchSavedReports = async () => {
+    try {
+      const response = await fetch(`${API_URL}/reports`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setSavedReports(data);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchSavedReports();
   }, []);
 
@@ -255,22 +263,30 @@ const Reports: React.FC = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.post(
-        "http://localhost:3000/reports/generate/monthly",
-        dateRange
-      );
-      const statistics = calculateStatistics(response.data.transactions);
+      const response = await fetch(`${API_URL}/reports/generate/monthly`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          from: dateRange.from,
+          to: dateRange.to
+        })
+      });
+      const data = await response.json();
+      const statistics = calculateStatistics(data.transactions);
       const categoryStats = calculateCategoryStatistics(
-        response.data.transactions
+        data.transactions
       );
 
       setReportData({
-        ...response.data,
+        ...data,
         statistics,
         categoryStatistics: categoryStats,
       });
-    } catch (err) {
-      console.error("Error generating report:", err);
+    } catch (error) {
+      console.error('Error generating report:', error);
       setError("Не удалось сгенерировать отчет");
     } finally {
       setLoading(false);
@@ -281,15 +297,23 @@ const Reports: React.FC = () => {
     if (!reportData) return;
 
     try {
-      const response = await axios.post("http://localhost:3000/reports", {
-        report_type: "monthly",
-        period_from: reportData.period.from,
-        period_to: reportData.period.to,
+      const response = await fetch(`${API_URL}/reports`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          report_type: 'monthly',
+          period_from: reportData.period.from,
+          period_to: reportData.period.to
+        })
       });
 
-      setSavedReports([response.data, ...savedReports]);
-    } catch (err) {
-      console.error("Error saving report:", err);
+      const data = await response.json();
+      setSavedReports([data, ...savedReports]);
+    } catch (error) {
+      console.error('Error saving report:', error);
       setError("Не удалось сохранить отчет");
     }
   };
@@ -299,26 +323,37 @@ const Reports: React.FC = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(`http://localhost:3000/reports/${id}`);
-      const reportResponse = await axios.post(
-        "http://localhost:3000/reports/generate/monthly",
-        {
-          from: response.data.period_from,
-          to: response.data.period_to,
+      const response = await fetch(`${API_URL}/reports/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      );
+      });
+      const reportData = await response.json();
+      
+      const reportResponse = await fetch(`${API_URL}/reports/generate/monthly`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          from: reportData.period_from,
+          to: reportData.period_to,
+        })
+      });
+      const generatedReport = await reportResponse.json();
 
-      const statistics = calculateStatistics(reportResponse.data.transactions);
+      const statistics = calculateStatistics(generatedReport.transactions);
       setReportData({
-        ...reportResponse.data,
+        ...generatedReport,
         statistics,
       });
       setDateRange({
-        from: response.data.period_from,
-        to: response.data.period_to,
+        from: reportData.period_from,
+        to: reportData.period_to,
       });
-    } catch (err) {
-      console.error("Error loading report:", err);
+    } catch (error) {
+      console.error('Error loading report:', error);
       setError("Не удалось загрузить отчет");
     } finally {
       setLoading(false);
@@ -330,22 +365,33 @@ const Reports: React.FC = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.get(`http://localhost:3000/reports/${id}`);
-      const reportResponse = await axios.post(
-        "http://localhost:3000/reports/generate/monthly",
-        {
-          from: response.data.period_from,
-          to: response.data.period_to,
+      const response = await fetch(`${API_URL}/reports/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      );
+      });
+      const reportData = await response.json();
+      
+      const reportResponse = await fetch(`${API_URL}/reports/generate/monthly`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          from: reportData.period_from,
+          to: reportData.period_to,
+        })
+      });
+      const generatedReport = await reportResponse.json();
 
-      const statistics = calculateStatistics(reportResponse.data.transactions);
+      const statistics = calculateStatistics(generatedReport.transactions);
       const tempReportData = {
-        ...reportResponse.data,
+        ...generatedReport,
         statistics,
         period: {
-          from: response.data.period_from,
-          to: response.data.period_to,
+          from: reportData.period_from,
+          to: reportData.period_to,
         },
       };
 
@@ -477,8 +523,8 @@ const Reports: React.FC = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (err) {
-      console.error("Error downloading report:", err);
+    } catch (error) {
+      console.error('Error downloading report:', error);
       setError("Не удалось скачать отчет");
     } finally {
       setLoading(false);
