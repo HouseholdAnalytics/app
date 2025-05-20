@@ -1,13 +1,13 @@
 version: '3.8'
 
 services:
-  backend:
+  app:
     build:
-      context: ./server
+      context: .
       dockerfile: Dockerfile
-    container_name: finance-backend
+    container_name: finance-app
     ports:
-      - "3000:3000"
+      - "80:80"
     environment:
       - NODE_ENV=production
       - DB_HOST=${DB_HOST}
@@ -15,17 +15,4 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_DATABASE=${DB_DATABASE}
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: finance-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-    environment:
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
     restart: unless-stopped
