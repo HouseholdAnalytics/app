@@ -34,7 +34,6 @@ const Transactions: React.FC = () => {
     dateTo: "",
   });
 
-
   const [formData, setFormData] = useState({
     category_id: "",
     amount: "",
