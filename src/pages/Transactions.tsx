@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format } from "date-fns";
-import { Plus, Trash2, Filter } from "lucide-react";
-import { useAuth } from '../contexts/AuthContext';
-import { API_URL } from '../config';
+import { Plus, Trash2, Filter, Edit } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { API_URL } from "../config";
 
 interface Category {
   id: number;
@@ -25,6 +25,8 @@ const Transactions: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
   const [filters, setFilters] = useState({
     type: "all",
     category: "all",
@@ -32,7 +34,7 @@ const Transactions: React.FC = () => {
     dateTo: "",
   });
 
-  // Form state
+
   const [formData, setFormData] = useState({
     category_id: "",
     amount: "",
@@ -50,19 +52,19 @@ const Transactions: React.FC = () => {
         const [transactionsResponse, categoriesResponse] = await Promise.all([
           fetch(`${API_URL}/transactions`, {
             headers: {
-              'Authorization': `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           }),
           fetch(`${API_URL}/categories`, {
             headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
 
         const [transactionsData, categoriesData] = await Promise.all([
           transactionsResponse.json(),
-          categoriesResponse.json()
+          categoriesResponse.json(),
         ]);
 
         setTransactions(transactionsData);
@@ -77,6 +79,18 @@ const Transactions: React.FC = () => {
 
     fetchData();
   }, [token]);
+
+  useEffect(() => {
+    if (editingTransaction) {
+      setFormData({
+        category_id: String(editingTransaction.category.id),
+        amount: String(editingTransaction.amount),
+        date: editingTransaction.date,
+        comment: editingTransaction.comment || "",
+      });
+      setShowForm(true);
+    }
+  }, [editingTransaction]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -99,20 +113,51 @@ const Transactions: React.FC = () => {
 
     try {
       setError("");
-      const response = await fetch(`${API_URL}/transactions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formData,
-          amount: parseFloat(formData.amount),
-          category_id: parseInt(formData.category_id),
-        })
-      });
-      const data = await response.json();
-      setTransactions([data, ...transactions]);
+
+      const body = {
+        ...formData,
+        amount: parseFloat(formData.amount),
+        category_id: parseInt(formData.category_id),
+      };
+
+      let response;
+
+      if (editingTransaction) {
+        response = await fetch(
+          `${API_URL}/transactions/${editingTransaction.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
+          }
+        );
+
+        const updatedTransaction = await response.json();
+
+        setTransactions(
+          transactions.map((t) =>
+            t.id === editingTransaction.id ? updatedTransaction : t
+          )
+        );
+
+        setEditingTransaction(null);
+      } else {
+        response = await fetch(`${API_URL}/transactions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        });
+
+        const data = await response.json();
+        setTransactions([data, ...transactions]);
+      }
+
       setShowForm(false);
       setFormData({
         category_id: "",
@@ -121,9 +166,13 @@ const Transactions: React.FC = () => {
         comment: "",
       });
     } catch (err: any) {
-      console.error("Error creating transaction:", err);
-      setError(err.response?.data?.message || "Не удалось создать транзакцию");
+      console.error("Error with transaction:", err);
+      setError(err.response?.data?.message || "Не удалось выполнить операцию");
     }
+  };
+
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
   };
 
   const handleDelete = async (id: number) => {
@@ -133,10 +182,10 @@ const Transactions: React.FC = () => {
 
     try {
       await fetch(`${API_URL}/transactions/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       setTransactions(transactions.filter((t) => t.id !== id));
     } catch (err) {
@@ -187,7 +236,16 @@ const Transactions: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold mt-6">Транзакции</h1>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setEditingTransaction(null);
+            setFormData({
+              category_id: "",
+              amount: "",
+              date: format(new Date(), "yyyy-MM-dd"),
+              comment: "",
+            });
+            setShowForm(!showForm);
+          }}
           className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-blue-600 transition-colors"
         >
           <Plus size={18} />
@@ -201,11 +259,13 @@ const Transactions: React.FC = () => {
         </div>
       )}
 
-      {/* Add Transaction Form */}
+      {/* Add/Edit Transaction Form */}
       {showForm && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h2 className="text-lg font-semibold mb-4">
-            Добавить новую транзакцию
+            {editingTransaction
+              ? "Редактировать транзакцию"
+              : "Добавить новую транзакцию"}
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -305,7 +365,10 @@ const Transactions: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingTransaction(null);
+                }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Отмена
@@ -314,7 +377,9 @@ const Transactions: React.FC = () => {
                 type="submit"
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
               >
-                Сохранить транзакцию
+                {editingTransaction
+                  ? "Сохранить изменения"
+                  : "Сохранить транзакцию"}
               </button>
             </div>
           </form>
@@ -463,12 +528,20 @@ const Transactions: React.FC = () => {
                       {Number(transaction.amount).toFixed(2)} ₽
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleDelete(transaction.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => handleEdit(transaction)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(transaction.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

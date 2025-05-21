@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Delete, Request } from '@nestjs/common';
-import { CategoriesService } from './categories.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  UseGuards,
+  Delete,
+  Request,
+} from "@nestjs/common";
+import { CategoriesService } from "./categories.service";
+import { CreateCategoryDto } from "./dto/create-category.dto";
+import { UpdateCategoryDto } from "./dto/update-category.dto";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
-@Controller('categories')
+@Controller("categories")
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
@@ -20,20 +31,34 @@ export class CategoriesController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
+  @Get(":id")
+  findOne(@Param("id") id: string, @Request() req) {
     return this.categoriesService.findOne(+id, req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('type/:type')
-  findByType(@Param('type') type: string, @Request() req) {
+  @Get("type/:type")
+  findByType(@Param("type") type: string, @Request() req) {
     return this.categoriesService.findByType(type, req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
+  @Put(":id")
+  update(
+    @Param("id") id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Request() req
+  ) {
+    return this.categoriesService.update(
+      +id,
+      updateCategoryDto,
+      req.user.userId
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(":id")
+  remove(@Param("id") id: string, @Request() req) {
     return this.categoriesService.remove(+id, req.user.userId);
   }
 }
