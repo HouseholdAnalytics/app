@@ -16,7 +16,13 @@ export class TransactionsService {
       ...createTransactionDto,
       user_id: userId,
     });
-    return this.transactionsRepository.save(transaction);
+    const savedTransaction = await this.transactionsRepository.save(transaction);
+    
+    // Загружаем транзакцию с данными категории
+    return this.transactionsRepository.findOne({
+      where: { id: savedTransaction.id },
+      relations: ['category'],
+    });
   }
 
   async findAllByUser(userId: number): Promise<Transaction[]> {
