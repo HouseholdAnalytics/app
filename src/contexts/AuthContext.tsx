@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { API_URL } from '../config';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: number;
@@ -24,9 +25,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          delete axios.defaults.headers.common['Authorization'];
+          navigate('/login');
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [navigate]);
+
+  useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
@@ -34,16 +56,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
       
-      // Set axios default headers
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+
+      fetch(`${API_URL}/auth/verify`, {
+        headers: {
+          'Authorization': `Bearer ${storedToken}`
+        }
+      }).catch(() => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        delete axios.defaults.headers.common['Authorization'];
+        navigate('/login');
+      });
     }
     
     setLoading(false);
-  }, []);
+  }, [navigate]);
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('Using API URL:', API_URL);
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -61,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(data.access_token);
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -95,6 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
+    navigate('/login');
   };
 
   const value = {
