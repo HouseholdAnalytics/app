@@ -97,6 +97,23 @@ const Transactions: React.FC = () => {
     >
   ) => {
     const { name, value } = e.target;
+    
+    // Валидация комментария
+    if (name === 'comment' && value.length > 255) {
+      return;
+    }
+    
+    // Валидация суммы
+    if (name === 'amount') {
+      const numValue = parseFloat(value);
+      if (numValue > 999999999) { // Ограничение на 1 миллиард
+        return;
+      }
+      if (value.includes('.') && value.split('.')[1]?.length > 2) {
+        return; // Максимум 2 знака после запятой
+      }
+    }
+    
     setFormData({ ...formData, [name]: value });
   };
 
@@ -320,8 +337,10 @@ const Transactions: React.FC = () => {
                   onChange={handleInputChange}
                   step="0.01"
                   min="0.01"
+                  max="999999999"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  placeholder="Введите сумму (макс. 999,999,999)"
                 />
               </div>
 
@@ -357,6 +376,8 @@ const Transactions: React.FC = () => {
                   value={formData.comment}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  maxLength={255}
+                  placeholder="Максимум 255 символов"
                 />
               </div>
             </div>

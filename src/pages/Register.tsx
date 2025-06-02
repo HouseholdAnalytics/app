@@ -16,6 +16,22 @@ const Register: React.FC = () => {
     e.preventDefault();
     setError('');
     
+    // Валидация имени пользователя
+    if (username.length < 3) {
+      return setError('Имя пользователя должно содержать не менее 3 символов');
+    }
+    if (username.length > 30) {
+      return setError('Имя пользователя не должно превышать 30 символов');
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      return setError('Имя пользователя может содержать только буквы, цифры и знак подчеркивания');
+    }
+
+    // Валидация email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return setError('Введите корректный email адрес');
+    }
+    
     if (password !== confirmPassword) {
       return setError('Пароли не совпадают');
     }
@@ -60,6 +76,9 @@ const Register: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              maxLength={30}
+              pattern="[a-zA-Z0-9_]+"
+              placeholder="От 3 до 30 символов (буквы, цифры, _)"
             />
           </div>
           
