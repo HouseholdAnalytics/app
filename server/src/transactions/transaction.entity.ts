@@ -21,7 +21,7 @@ export class Transaction {
   @Column()
   category_id: number;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 15, scale: 2 })
   amount: number;
 
   @Column('date')
