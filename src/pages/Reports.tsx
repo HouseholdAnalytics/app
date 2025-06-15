@@ -69,8 +69,11 @@ interface StatisticalMetrics {
 interface CategoryStatistics {
   name: string;
   type: string;
+  mean: number;
   median: number;
   mode: number;
+  variance: number;
+  standardDeviation: number;
   transactions: number[];
 }
 
@@ -227,6 +230,9 @@ const Reports: React.FC = () => {
     // Рассчитываем статистику для каждой категории
     return Array.from(categoriesMap.entries()).map(([name, data]) => {
       const amounts = data.amounts;
+      
+      // Среднее значение
+      const mean = amounts.reduce((sum, val) => sum + val, 0) / amounts.length;
 
       // Медиана
       const sorted = [...amounts].sort((a, b) => a - b);
@@ -248,11 +254,24 @@ const Reports: React.FC = () => {
         }
       });
 
+      // Дисперсия
+      const variance =
+        amounts.length > 1
+          ? amounts.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+            (amounts.length - 1)
+          : 0;
+
+      // Среднеквадратичное отклонение
+      const standardDeviation = Math.sqrt(variance);
+
       return {
         name,
         type: data.type,
+        mean,
         median,
         mode,
+        variance,
+        standardDeviation,
         transactions: amounts,
       };
     });
@@ -276,9 +295,7 @@ const Reports: React.FC = () => {
       });
       const data = await response.json();
       const statistics = calculateStatistics(data.transactions);
-      const categoryStats = calculateCategoryStatistics(
-        data.transactions
-      );
+      const categoryStats = calculateCategoryStatistics(data.transactions);
 
       setReportData({
         ...data,
@@ -344,9 +361,12 @@ const Reports: React.FC = () => {
       const generatedReport = await reportResponse.json();
 
       const statistics = calculateStatistics(generatedReport.transactions);
+      const categoryStats = calculateCategoryStatistics(generatedReport.transactions);
+      
       setReportData({
         ...generatedReport,
         statistics,
+        categoryStatistics: categoryStats,
       });
       setDateRange({
         from: reportData.period_from,
